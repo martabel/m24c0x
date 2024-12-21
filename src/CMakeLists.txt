@@ -1,0 +1,5 @@
+file(GLOB FILES *.cpp *.hpp)
+add_library(m24c0x ${FILES})
+target_link_libraries(m24c0x pico_stdlib)
+target_link_libraries(m24c0x hardware_i2c)
+target_include_directories(m24c0x PUBLIC ../include/)
