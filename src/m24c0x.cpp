@@ -36,24 +36,33 @@ void M24C0x::deinit(){
 }
 
 bool M24C0x::write_bytes(uint8_t start_address, uint8_t *data, uint8_t length){
+    int ret;
+    uint8_t dataIdx = 0;
+    uint8_t addressCnt = start_address;
     if(!isInitialized) {
         this->init();
     }
 
-    int ret;
+    // todo write bytes in pages instead of single bytes  
     // fill buffer with eeprom address [0] + data[x]
-    this->buffer[0] = start_address;
+    //this->buffer[0] = start_address;
     // write given data after the address byte in the buffer
-    memcpy(this->buffer+1, data, length);
+    // memcpy(this->buffer+1, data, length);
 
     // set inverted write control for write access
     gpio_put(this->wc_pin, false);
-    sleep_ms(1);
-    // write address and data bytes with stop
-    ret = i2c_write_blocking(this->i2c, this->i2c_address, this->buffer, length+1, false);
+    for(; dataIdx < length-1; dataIdx++)
+    {
+        this->buffer[0] = addressCnt;
+        this->buffer[1] = data[dataIdx];
+        addressCnt++;
+        // write address and data byte with stop
+        ret = i2c_write_blocking(this->i2c, this->i2c_address, this->buffer, 2, false);
+        // sleep max write time for each byte
+        sleep_ms(5);
+    }
     // reset write control
     gpio_put(this->wc_pin, true);
-    sleep_ms(1);
 
     if (ret != PICO_ERROR_GENERIC) {
         return true;    

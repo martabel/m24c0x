@@ -6,31 +6,56 @@
 #define WC_PIN 13   
 #define I2C_ADDR 0x50
 
+#define B_SIZE 50
 
 int main()
 {
+    char input = 0;
+
     M24C0x eeprom(I2C_PORT, I2C_ADDR, I2C_SDA, I2C_SCL, WC_PIN);
 
     eeprom.init();
 
+    uint8_t buffer[B_SIZE] = {0};
 
-    uint8_t wBytes[10] ={11, 22, 33, 44, 55, 66, 77, 88, 99, 100};
-    if(!eeprom.write_bytes(0, wBytes, 10)) {
-        printf("\nError while write to the eeprom\n");
-    }
-
-    while (true) {
-        printf("\nRead bytes\n");
-        uint8_t rBytes[5] = {0};
-
-        if(!eeprom.read_bytes(0, rBytes, 5)) {
-            printf("\nError while read from the eeprom\n");
+    while (true) 
+    {
+        //clear buffer
+        for(int i=0;i<B_SIZE;i++)
+        {
+            buffer[i] = 0;
+        }
+        printf("\nType 'r' for read and 'w' for write test\n");
+        input = getchar();
+        if(input == 'r')
+        {
+            if(!eeprom.read_bytes(0, buffer, B_SIZE)) 
+            {
+                printf("\nError while read from the eeprom\n");
+            }
+            printf("Read: %s\n", buffer);
+            /*
+            for(int i=0;i<B_SIZE;i++)
+            {
+                printf("%#x ", buffer[i]);
+            }
+            */
+            printf("\n");
+        }else if(input == 'w')
+        {
+            printf("Enter string to write: ");
+            scanf("%49s", buffer);
+            printf("\nWrite: %s\n", buffer);
+            if(!eeprom.write_bytes(0, buffer, B_SIZE))
+            {
+                printf("Error while write to the eeprom\n");
+            }
+            printf("Write done.\n");
+        }else
+        {
+            printf("\nNo valid command entered!\n");
         }
 
-        for(uint8_t i=0; i<5; i++) {
-            printf("Address: %d Value: %d\n", i, rBytes[i]);
-        }
-
-        sleep_ms(2000);
+        sleep_ms(1000);
     }
 }
