@@ -51,7 +51,7 @@ bool M24C0x::write_bytes(uint8_t start_address, uint8_t *data, uint8_t length){
 
     // set inverted write control for write access
     gpio_put(this->wc_pin, false);
-    for(; dataIdx < length-1; dataIdx++)
+    for(; dataIdx < length; dataIdx++)
     {
         this->buffer[0] = addressCnt;
         this->buffer[1] = data[dataIdx];
